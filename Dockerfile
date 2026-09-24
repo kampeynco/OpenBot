@@ -129,6 +129,7 @@ COPY --from=deps /src/bun.lock bun.lock
 COPY --from=deps /src/agent-computer/node_modules agent-computer/node_modules
 
 COPY server server
+COPY worker worker
 COPY shared shared
 COPY examples examples
 COPY agent-computer/src agent-computer/src

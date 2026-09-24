@@ -1,0 +1,7 @@
+#!/command/with-contenv sh
+set -eu
+[ "${EMBEDDED_WORKER:-off}" = "on" ] || exec sleep infinity
+cd /app
+export HOME=/home/apiuser
+export SERVER_INTERNAL_URL="http://127.0.0.1:${PORT:-3001}"
+exec s6-setuidgid apiuser /usr/local/bin/bun worker/src/index.ts
