@@ -7,6 +7,17 @@
 # difference between the container working and the operator reading a runbook.
 set -eu
 [ "${EMBEDDED_POSTGRES:-off}" = "on" ] || exit 0
+# s6 starting the postgres process does not mean it is accepting connections yet.
+# Wait before the one-shot migration; a startup refusal otherwise leaves the API down.
+attempt=0
+until pg_isready -q -h 127.0.0.1 -p 5432 -U openbot -d openbot -t 1; do
+  attempt=$((attempt + 1))
+  if [ "$attempt" -ge 60 ]; then
+    echo "migrate: PostgreSQL did not become ready; migrations were not run." >&2
+    exit 1
+  fi
+  sleep 1
+done
 cd /app/server
 export HOME=/home/apiuser
 # `scripts/migrate.ts`, not `drizzle-kit`. The CLI is a development dependency and needs esbuild to
